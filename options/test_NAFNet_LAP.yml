@@ -1,0 +1,51 @@
+# general settings
+name: test_NAFNet_LAP_20240114
+model_type: ImageMlossModel
+scale: 1
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 100
+
+# dataset and data loader settings
+datasets:
+  test:
+    name: ValSet
+    type: LAPDataSetNoWarp
+    dataroot_gt: ~
+    io_backend:
+      type: disk
+
+network_g:
+  type: NAFNet
+  img_channel: 1
+  width: 64
+  middle_blk_num: 1
+  enc_blk_nums: [1, 1, 1, 28]
+  dec_blk_nums: [1, 1, 1, 1]
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+
+# validation settings
+val:
+  save_img: False
+  use_image: true # a litte different from true in PSNR and SSIM, we apply true for PSNR and SSIM, and false for gmsd (otherwise error occurs)
+
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
+    # gmsd:
+    #   type: calculate_gmsd
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

@@ -1,0 +1,14 @@
+einops
+h5py
+lmdb
+matplotlib
+numpy
+opencv-python
+ptflops
+pyyaml
+scikit-image
+scipy
+torch
+torchvision
+tqdm
+wandb

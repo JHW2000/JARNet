@@ -359,32 +359,31 @@ def flow_warp(x, flow, interp_mode='bilinear', padding_mode='zeros', align_corne
     return output
 
 
-class OFCBlock(nn.Module):
-    def __init__(self):
-        n_feat = 16
-        bias = True
-        self.flowin = nn.Sequential(nn.Conv2d(2, n_feat, kernel_size=3, padding=1, bias=bias),
-                        nn.Conv2d(n_feat, n_feat*2, kernel_size=7, padding=3, bias=bias),
-                        nn.Tanh(),
-                        nn.Conv2d(n_feat*2, n_feat*4, kernel_size=7, padding=3, bias=bias),
-                        nn.Conv2d(n_feat*4, n_feat*8, kernel_size=7, padding=3, bias=bias))
-        self.sca = nn.Sequential(
-                        nn.AdaptiveAvgPool2d(1),
-                        nn.Conv2d(in_channels=n_feat*8, out_channels=n_feat*8, kernel_size=1, padding=0, stride=1,
-                                groups=1, bias=True),
-        )
-        self.flowout = nn.Sequential(nn.Conv2d(n_feat*8, n_feat*4, kernel_size=7, padding=3, bias=bias),
-                        nn.Conv2d(n_feat*4, n_feat*2, kernel_size=7, padding=3, bias=bias),
-                        nn.Tanh(),
-                        nn.Conv2d(n_feat*2, n_feat, kernel_size=7, padding=3, bias=bias),
-                        nn.Conv2d(n_feat, 2, kernel_size=3, padding=1,bias=bias),)
+# class OFCBlock(nn.Module):
+#     def __init__(self, n_feat=16, bias=True):
+#         super().__init__()
+#         self.flowin = nn.Sequential(nn.Conv2d(2, n_feat, kernel_size=3, padding=1, bias=bias),
+#                         nn.Conv2d(n_feat, n_feat*2, kernel_size=7, padding=3, bias=bias),
+#                         nn.Tanh(),
+#                         nn.Conv2d(n_feat*2, n_feat*4, kernel_size=7, padding=3, bias=bias),
+#                         nn.Conv2d(n_feat*4, n_feat*8, kernel_size=7, padding=3, bias=bias))
+#         self.sca = nn.Sequential(
+#                         nn.AdaptiveAvgPool2d(1),
+#                         nn.Conv2d(in_channels=n_feat*8, out_channels=n_feat*8, kernel_size=1, padding=0, stride=1,
+#                                 groups=1, bias=True),
+#         )
+#         self.flowout = nn.Sequential(nn.Conv2d(n_feat*8, n_feat*4, kernel_size=7, padding=3, bias=bias),
+#                         nn.Conv2d(n_feat*4, n_feat*2, kernel_size=7, padding=3, bias=bias),
+#                         nn.Tanh(),
+#                         nn.Conv2d(n_feat*2, n_feat, kernel_size=7, padding=3, bias=bias),
+#                         nn.Conv2d(n_feat, 2, kernel_size=3, padding=1,bias=bias),)
 
-    def forward(self, flow_inp):
-        flow = self.flowin(flow_inp)
-        flow = flow * self.sca(flow)
-        flow = self.flowout(flow)
-        flow = flow + flow_inp
-        return flow
+#     def forward(self, flow_inp):
+#         flow = self.flowin(flow_inp)
+#         flow = flow * self.sca(flow)
+#         flow = self.flowout(flow)
+#         flow = flow + flow_inp
+#         return flow
 
 
 class JARNet(nn.Module):
@@ -448,7 +447,25 @@ class JARNet(nn.Module):
         self.padder_size = 2 ** len(self.encoders)
 
         # Optical Flow Correction (OFC) Block 
-        self.ofc = OFCBlock()
+        
+        # self.ofc = OFCBlock()
+        n_feat = 16
+        bias = True
+        self.flowin = nn.Sequential(nn.Conv2d(2, n_feat, kernel_size=3, padding=1, bias=bias),
+                        nn.Conv2d(n_feat, n_feat*2, kernel_size=7, padding=3, bias=bias),
+                        nn.Tanh(),
+                        nn.Conv2d(n_feat*2, n_feat*4, kernel_size=7, padding=3, bias=bias),
+                        nn.Conv2d(n_feat*4, n_feat*8, kernel_size=7, padding=3, bias=bias))
+        self.sca = nn.Sequential(
+                        nn.AdaptiveAvgPool2d(1),
+                        nn.Conv2d(in_channels=n_feat*8, out_channels=n_feat*8, kernel_size=1, padding=0, stride=1,
+                                groups=1, bias=True),
+        )
+        self.flowout = nn.Sequential(nn.Conv2d(n_feat*8, n_feat*4, kernel_size=7, padding=3, bias=bias),
+                        nn.Conv2d(n_feat*4, n_feat*2, kernel_size=7, padding=3, bias=bias),
+                        nn.Tanh(),
+                        nn.Conv2d(n_feat*2, n_feat, kernel_size=7, padding=3, bias=bias),
+                        nn.Conv2d(n_feat, 2, kernel_size=3, padding=1,bias=bias),)
         
         self.feature_map = None # Only for visualizations
 
@@ -457,7 +474,11 @@ class JARNet(nn.Module):
         inp = self.check_image_size(inp)
         flow_inp = self.check_image_size(flow)
         
-        flow = self.ofc(flow_inp)
+        # flow = self.ofc(flow_inp)
+        flow = self.flowin(flow_inp)
+        flow = flow * self.sca(flow)
+        flow = self.flowout(flow)
+        flow = flow + flow_inp
         
         inp = flow_warp(inp, -flow.permute(0,2,3,1).contiguous())
 

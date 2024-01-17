@@ -10,7 +10,7 @@ datasets:
   test:
     name: ValSet
     type: LAPDataSetNoWarp
-    dataroot_gt: ~
+    dataroot_gt: ~ # Please fill out the path to the LAP evaluation dataset.
     io_backend:
       type: disk
 

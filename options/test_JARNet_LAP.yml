@@ -10,7 +10,7 @@ datasets:
   test:
     name: ValSet
     type: LAPDataSet
-    dataroot_gt: ~
+    dataroot_gt: ~ # Please fill out the path to the LAP evaluation dataset.
     io_backend:
       type: disk
 
@@ -25,7 +25,7 @@ network_g:
 
 # path
 path:
-  pretrain_network_g: ~
+  pretrain_network_g: ~ # Please fill out the path to the pre-trained model.
   strict_load_g: true
   resume_state: ~
 

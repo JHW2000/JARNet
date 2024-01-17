@@ -10,7 +10,7 @@ datasets:
   train:
     name: TrainSet
     type: LAPDataSet
-    dataroot_gt: ~
+    dataroot_gt: ~ # Please fill out the path to the LAP training dataset.
     filename_tmpl: '{}'
     io_backend:
       type: disk
@@ -31,7 +31,7 @@ datasets:
   val:
     name: ValSet
     type: LAPDataSet
-    dataroot_gt: ~
+    dataroot_gt: ~ # Please fill out the path to the LAP evaluation dataset.
     io_backend:
       type: disk
 
